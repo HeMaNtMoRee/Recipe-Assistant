@@ -16,7 +16,6 @@ A conversational AI-powered chatbot that recommends cooking recipes based on use
 -   **AI Model:** [Ollama](https://ollama.com/) (running models like Llama3, Mistral, etc., locally)
 -   **Frontend:** HTML, CSS, JavaScript
 -   **Python Libraries:** PyMongo, Requests, Pandas, python-dotenv
--   **WSGI Server:** Gunicorn (for production deployment)
 
 ## Project Structure
 
