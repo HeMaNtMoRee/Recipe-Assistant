@@ -43,7 +43,10 @@ Follow these steps to set up and run the project on your local system.
 Make sure you have the following installed on your system:
 -   [Python 3.8+](https://www.python.org/downloads/)
 -   [Ollama](https://ollama.com/)
--   A dataset of recipes in CSV format.
+-   [CSV](https://recipenlg.cs.put.poznan.pl/)
+#### Dataset Source
+- This project uses a dataset sourced from Hugging Face Datasets — originally created and shared by [Michal Bien](https://huggingface.co/mbien).
+- I sincerely thank the author for making this dataset publicly available for research and educational purposes.
 
 ### 2. Clone the Repository
 
