@@ -1,0 +1,228 @@
+.upload-area {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  gap: 22px;
+}
+
+.upload-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+  padding: 44px 30px;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--t), background var(--t), box-shadow var(--t), transform var(--t-fast);
+  animation: fadeSlideUp var(--t-slow);
+}
+
+.upload-card svg {
+  color: var(--text-tertiary);
+  transition: color var(--t), transform var(--t);
+}
+
+.upload-card:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: var(--shadow-sm);
+}
+
+.upload-card:hover svg {
+  color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.upload-card--drag {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: var(--shadow-sm);
+}
+
+.upload-card h3 {
+  color: var(--text-primary);
+  font-size: 14.5px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.upload-card p {
+  font-size: 12.5px;
+}
+
+.limit-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+.limit-control select {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 6px 9px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  outline: none;
+  transition: border-color var(--t-fast);
+}
+
+.limit-control select:focus,
+.limit-control select:hover {
+  border-color: var(--border-strong);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 9px 22px;
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-top: 6px;
+  transition: background var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
+}
+
+.btn-primary:hover {
+  background: var(--accent-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Progress */
+.upload-progress {
+  width: 100%;
+  max-width: 460px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px 22px;
+  box-shadow: var(--shadow-xs);
+  animation: fadeSlideUp var(--t-slow);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.progress-phase {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--accent-strong);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.progress-pct {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-track {
+  width: 100%;
+  height: 7px;
+  background: var(--bg-subtle);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 4px;
+  transition: width 0.4s var(--ease);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.35) 50%, transparent 100%);
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.progress-detail {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  margin-top: 9px;
+  text-align: center;
+}
+
+/* Result */
+.upload-result {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 15px 18px;
+  font-size: 12.5px;
+  max-width: 460px;
+  width: 100%;
+  box-shadow: var(--shadow-xs);
+  animation: fadeSlideUp var(--t-slow);
+}
+
+.upload-result__icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.upload-result--ok {
+  border-color: var(--accent-soft-border);
+}
+
+.upload-result--ok .upload-result__icon {
+  color: var(--success);
+}
+
+.upload-result--err {
+  border-color: var(--error);
+  background: var(--error-soft);
+}
+
+.upload-result--err .upload-result__icon {
+  color: var(--error);
+}
+
+.upload-result__meta {
+  color: var(--text-secondary);
+  margin-top: 4px;
+}

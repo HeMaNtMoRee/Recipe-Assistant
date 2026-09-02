@@ -1,0 +1,175 @@
+/* ════════════════════════════════════════════════════════════════════
+   Recipe Assistant — Design tokens
+   A calm, minimal, developer-tool aesthetic in the spirit of Claude Code.
+   ════════════════════════════════════════════════════════════════════ */
+
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap");
+
+:root {
+  /* Palette — soft off-white, warm neutral grays, one restrained accent */
+  --bg: #fafaf8;
+  --bg-elevated: #ffffff;
+  --bg-subtle: #f4f3ef;
+  --bg-hover: #efeee9;
+
+  --border: #e6e4dd;
+  --border-strong: #d9d6cc;
+
+  --text-primary: #1c1b18;
+  --text-secondary: #6f6d64;
+  --text-tertiary: #a5a297;
+
+  --accent: #3f6b52;
+  --accent-strong: #2f5140;
+  --accent-soft: #eaf1ec;
+  --accent-soft-border: #cfe0d5;
+
+  --success: #3f8361;
+  --error: #b5533f;
+  --error-soft: #fbeeeb;
+
+  /* Typography */
+  --font-mono: "JetBrains Mono", "SF Mono", "IBM Plex Mono", "Cascadia Code", ui-monospace, Menlo, Consolas, monospace;
+
+  /* Sizing */
+  --sidebar-width: 232px;
+  --radius-sm: 8px;
+  --radius-md: 11px;
+  --radius-lg: 15px;
+
+  /* Shadows — light and diffused */
+  --shadow-xs: 0 1px 2px rgba(28, 27, 24, 0.04);
+  --shadow-sm: 0 2px 6px rgba(28, 27, 24, 0.05), 0 1px 2px rgba(28, 27, 24, 0.03);
+  --shadow-md: 0 6px 20px rgba(28, 27, 24, 0.06), 0 1px 3px rgba(28, 27, 24, 0.04);
+  --shadow-focus: 0 0 0 3px var(--accent-soft-border);
+
+  /* Motion */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --t-fast: 0.14s var(--ease);
+  --t: 0.2s var(--ease);
+  --t-slow: 0.35s var(--ease);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+::selection {
+  background: var(--accent-soft-border);
+}
+
+/* Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 4px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Shared keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Visible keyboard focus, app-wide */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-radius: var(--radius-sm);
+}
