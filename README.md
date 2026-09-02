@@ -1,232 +1,193 @@
 # Recipe Assistant
 
-A full stack AI powered recipe chatbot built with Retrieval Augmented Generation (RAG). Users can upload recipe datasets in JSON or CSV format, perform semantic searches across recipes, and chat with an AI assistant that retrieves relevant recipe context before generating responses using a local Ollama language model.
+Recipe Assistant is a full-stack recipe search and chat application built with FastAPI, React, ChromaDB, and Ollama. It lets users upload recipe datasets in JSON or CSV format, run semantic search over the stored recipes, and ask a local AI assistant for recipe recommendations and cooking guidance using retrieval-augmented generation (RAG).
 
-## Table of Contents
+## Features
 
-1. [Architecture Overview](#architecture-overview)
-2. [Technology Stack](#technology-stack)
-3. [Project Structure](#project-structure)
-4. [Prerequisites](#prerequisites)
-5. [Installation](#installation)
-6. [Dataset Format](#dataset-format)
-7. [Running the Application](#running-the-application)
-8. [Using the Application](#using-the-application)
-9. [API Reference](#api-reference)
-10. [How the RAG Pipeline Works](#how-the-rag-pipeline-works)
-11. [Data Management](#data-management)
-12. [Troubleshooting](#troubleshooting)
+- Upload recipe collections from JSON or CSV files
+- Store recipe metadata in SQLite
+- Split recipes into searchable chunks for semantic retrieval
+- Use sentence-transformers to generate embeddings with ChromaDB
+- Search recipes by meaning, not only exact keywords
+- Chat with a local Ollama model using retrieved recipe context
+- Stream progress updates while ingesting uploaded files
+- Serve the built frontend from the FastAPI backend
 
----
+## Tech stack
 
-## Architecture Overview
+- Backend: FastAPI, SQLAlchemy, Uvicorn
+- Database: SQLite
+- Vector search: ChromaDB
+- Embeddings: sentence-transformers / all-MiniLM-L6-v2
+- AI model: Ollama with `gemma3:4b`
+- Frontend: React + Vite
 
-The application follows a three layer architecture:
+## Project structure
 
-```
-User Browser (Frontend)
-        |
-        | HTTP / SSE
-        v
-FastAPI Backend Server
-        |
-        +--> SQLite          (structured recipe storage)
-        +--> ChromaDB        (vector embeddings for semantic search)
-        +--> Sentence Transformers  (embedding generation)
-        +--> Ollama + Gemma 3:4b    (language model for chat responses)
-```
-
-When a user asks a question, the system embeds the query using the same model that was used to embed the recipes, searches ChromaDB for the most relevant recipe chunks, combines those chunks as context into a prompt, and streams the response from the Ollama language model back to the user in real time.
-
----
-
-## Technology Stack
-
-| Layer             | Technology                        | Purpose                                      |
-|-------------------|-----------------------------------|----------------------------------------------|
-| Web Framework     | FastAPI 0.115.0                   | REST API with async support and streaming     |
-| ASGI Server       | Uvicorn 0.30.6                    | Serves the FastAPI application                |
-| Relational DB     | SQLite via SQLAlchemy 2.0.35      | Stores raw recipe data in structured tables   |
-| Vector Database   | ChromaDB 0.5.5                    | Stores and queries vector embeddings          |
-| Embedding Model   | sentence-transformers 3.1.1       | Generates 384 dimensional embeddings          |
-| Embedding Variant | all-MiniLM-L6-v2 (approx 80 MB)  | Lightweight model, good speed and quality     |
-| Language Model    | Gemma 3:4b via Ollama             | Generates natural language chat responses     |
-| HTTP Client       | httpx 0.27.2                      | Communicates with the Ollama API              |
-| Frontend          | React 19 + Vite                   | Component-based UI, built to static assets    |
-
----
-
-## Project Structure
-
-```
+```text
 Recipe_Assistant/
-|
-|__ backend/
-|   |__ main.py              FastAPI application and all route definitions
-|   |__ database.py          SQLite connection setup using SQLAlchemy
-|   |__ models.py            ORM models (Recipe table) and Pydantic schemas
-|   |__ embedding.py         Embedding service and recipe chunking logic
-|   |__ vector_db.py         ChromaDB client, upsert, query, and clear functions
-|   |__ rag.py               RAG pipeline, prompt builder, Ollama streaming client
-|   |__ requirements.txt     Python dependencies
-|   |__ recipes.db           SQLite database file (created at runtime)
-|   |__ chroma_data/         ChromaDB persistent storage (created at runtime)
-|
-|__ frontend/
-|   |__ index.html           Vite entry HTML
-|   |__ vite.config.js       Vite config (dev proxy + dist build output)
-|   |__ package.json         Frontend dependencies (React 19 + Vite)
-|   |__ src/
-|   |   |__ main.jsx         React entry point
-|   |   |__ App.jsx          Root component: layout, view routing, health polling
-|   |   |__ api.js           Fetch helpers for chat/upload/search endpoints
-|   |   |__ index.css        Design tokens and base styles
-|   |   |__ utils/
-|   |   |   |__ markdown.js  Markdown-lite renderer for chat/result text
-|   |   |__ components/
-|   |       |__ Sidebar.jsx, ChatView.jsx, UploadView.jsx, SearchView.jsx,
-|   |           Message.jsx, ViewHeader.jsx, icons.jsx  (+ matching .css files)
-|   |__ dist/                Production build output (created by `npm run build`)
-|
-|__ data/
-|   |__ sample_recipes.json  12 sample recipes in JSON format for testing
-|
-|__ dataset/
-|   |__ full_dataset.csv     Large recipe dataset (2.2 million rows)
-|
-|__ README.md                This file
+├── backend/
+│   ├── database.py
+│   ├── embedding.py
+│   ├── main.py
+│   ├── models.py
+│   ├── rag.py
+│   ├── requirements.txt
+│   ├── vector_db.py
+│   ├── chroma_data/
+│   └── recipes.db
+├── data/
+│   └── sample_recipes.json
+├── frontend/
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── public/
+│   └── src/
+├── .gitignore
+├── README.md
+└── .venv/ (optional local virtual environment)
 ```
 
----
+## How it works
+
+The app has three main layers:
+
+1. Frontend React UI
+   - Chat tab
+   - Upload tab
+   - Search tab
+2. FastAPI backend
+   - Handles uploads, search, chat, and static frontend serving
+3. Recipe retrieval pipeline
+   - Recipe files are parsed and stored in SQLite
+   - Each recipe is chunked into overview, ingredients, and instructions sections
+   - Embeddings are created and saved in ChromaDB
+   - User queries are embedded and matched against stored recipe chunks
+   - Relevant recipe context is sent to Ollama for grounded responses
 
 ## Prerequisites
 
-Before setting up the project, ensure you have the following installed on your system.
+Before running the app, install the following:
 
-### Python
+- Python 3.10+
+- Node.js 18+
+- Ollama
+- Git (optional, but recommended)
 
-Python 3.10 or higher is required. Verify your installation:
+### Verify installation
 
-```
+```bash
 python --version
-```
-
-### Ollama
-
-Ollama is a local language model runtime. It runs the Gemma 3:4b model that powers the chat feature.
-
-1. Download Ollama from https://ollama.com/download
-2. Install it following the instructions for your operating system
-3. Verify the installation:
-
-```
+node --version
+npm --version
 ollama --version
 ```
 
-### Git (optional)
+## Setup
 
-Only needed if you are cloning this repository from a remote source.
+### 1) Clone the repository
 
----
-
-## Installation
-
-### Step 1: Clone or download the project
-
-If you have the project as a zip file, extract it to your desired location. If cloning:
-
-```
+```bash
 git clone <repository-url>
 cd Recipe_Assistant
 ```
 
-### Step 2: Create a Python virtual environment
-
-It is recommended to use a virtual environment to avoid conflicts with other Python projects.
+### 2) Create a Python virtual environment
 
 On Windows:
 
-```
-python -m venv venv
-venv\Scripts\activate
-```
-
-On macOS and Linux:
-
-```
-python3 -m venv venv
-source venv/bin/activate
+```bash
+python -m venv .venv
+.venv\Scripts\activate
 ```
 
-You should see `(venv)` in your terminal prompt after activation.
+On macOS/Linux:
 
-### Step 3: Install Python dependencies
-
+```bash
+python -m venv .venv
+source .venv/bin/activate
 ```
+
+### 3) Install backend dependencies
+
+```bash
 cd backend
 pip install -r requirements.txt
 ```
 
-This will install:
+### 4) Pull the Ollama model
 
-| Package              | What it does                                        |
-|----------------------|-----------------------------------------------------|
-| fastapi              | Web framework for building the API                  |
-| uvicorn[standard]    | ASGI server to run the FastAPI app                  |
-| sqlalchemy           | ORM for SQLite database operations                  |
-| chromadb             | Vector database for storing and querying embeddings |
-| sentence-transformers| Library for generating text embeddings              |
-| httpx                | Async HTTP client for calling the Ollama API        |
-| python-multipart     | Required by FastAPI for file upload handling        |
-| aiofiles             | Async file operations                               |
+Start Ollama:
 
-The first time you run the application, the `all-MiniLM-L6-v2` embedding model (approximately 80 MB) will be downloaded automatically by sentence-transformers. No separate download step is needed.
-
-### Step 4: Pull the Ollama language model
-
-Start the Ollama service:
-
-```
+```bash
 ollama serve
 ```
 
-In a separate terminal, pull the Gemma 3:4b model:
+Then pull the language model used by the app:
 
-```
+```bash
 ollama pull gemma3:4b
 ```
 
-This downloads approximately 3 GB. The model needs to be pulled only once. After pulling, leave `ollama serve` running in the background whenever you use the chat feature.
+### 5) Install frontend dependencies
 
-### Step 5: Install frontend dependencies and build the UI
+From the project root:
 
-The frontend is a React app built with Vite. Node.js 18 or higher is required. From the project root:
-
-```
-cd Recipe_Assistant/frontend
+```bash
+cd frontend
 npm install
-npm run build
 ```
 
-This produces a `frontend/dist/` folder of static assets, which FastAPI serves directly — no separate frontend server is needed in normal use. Re-run `npm run build` any time you change a file under `frontend/src/`.
+## Run the app
 
-If you're actively developing the UI, you can instead run a hot-reloading dev server on its own port:
+### Development mode
 
+Run the backend in one terminal:
+
+```bash
+cd backend
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
+
+Run the frontend in another terminal:
+
+```bash
+cd frontend
 npm run dev
 ```
 
-This starts Vite on `http://localhost:5173` and proxies API calls to the backend on port 8000 (see `frontend/vite.config.js`).
+The frontend dev server usually runs at:
 
----
+```text
+http://localhost:5173
+```
 
-## Dataset Format
+The Vite dev configuration proxies API calls to the backend at `http://localhost:8000`.
 
-The application supports two data formats for recipe ingestion.
+### Production-style mode
 
-### JSON Format
+Build the frontend once:
 
-A JSON file containing an array of recipe objects. Each object can have the following fields:
+```bash
+cd frontend
+npm run build
+```
+
+Then run the backend normally:
+
+```bash
+cd backend
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+If a built frontend exists under `frontend/dist`, the backend serves it as static files.
+
+## Uploading recipe data
+
+The app accepts `.json` and `.csv` files. The upload API streams progress updates while parsing, embedding, and indexing recipes.
+
+### JSON format
 
 ```json
 [
@@ -234,7 +195,12 @@ A JSON file containing an array of recipe objects. Each object can have the foll
     "title": "Pasta Carbonara",
     "description": "Classic Italian pasta dish",
     "ingredients": ["spaghetti", "eggs", "parmesan", "pancetta", "black pepper"],
-    "instructions": ["Boil pasta", "Fry pancetta", "Mix eggs and cheese", "Combine all"],
+    "instructions": [
+      "Boil the pasta until al dente.",
+      "Cook pancetta until crisp.",
+      "Whisk eggs and parmesan together.",
+      "Combine everything off heat and toss well."
+    ],
     "cuisine": "Italian",
     "category": "Main Course",
     "prep_time": "10 minutes",
@@ -246,7 +212,113 @@ A JSON file containing an array of recipe objects. Each object can have the foll
 ]
 ```
 
-Only `title` is required. All other fields are optional.
+### CSV format
+
+CSV files are parsed by the backend using common recipe columns such as:
+
+- `title`
+- `ingredients`
+- `directions`
+- `source`
+- `link`
+
+The app will accept arrays encoded as JSON strings in the CSV fields when needed.
+
+## Using the app
+
+### Chat view
+
+- Ask the assistant about ingredients, recipe ideas, meal planning, or cooking steps.
+- The app retrieves the most relevant recipe chunks and sends them to the local Ollama model.
+- Responses are streamed back in real time.
+
+### Search view
+
+- Enter a natural-language query like: “healthy vegetarian dinner”
+- The app finds similar recipe chunks using embeddings and cosine similarity
+- Results include matched text and similarity percentage
+
+### Upload view
+
+- Drag and drop a JSON or CSV file, or select one manually
+- Optionally limit how many recipes are ingested
+- Watch upload progress and final chunk counts as embeddings are stored
+
+## API endpoints
+
+### GET /
+
+Health check endpoint. Returns service status and stored chunk count.
+
+### POST /upload-recipes
+
+Uploads a JSON or CSV recipe dataset and streams progress updates as it parses and embeds content.
+
+### POST /search
+
+Performs semantic search over the recipe chunks.
+
+Request body:
+
+```json
+{
+  "query": "quick chicken dinner",
+  "top_k": 5
+}
+```
+
+### POST /chat
+
+Sends a chat message and returns a streamed AI response.
+
+Request body:
+
+```json
+{
+  "message": "What can I make with rice and eggs?",
+  "top_k": 5
+}
+```
+
+### DELETE /clear-data
+
+Removes all recipe records from SQLite and all embeddings from ChromaDB.
+
+## Notes
+
+- The first time the app runs, `SentenceTransformer` downloads the embedding model automatically.
+- ChromaDB persists recipe embeddings under `backend/chroma_data`.
+- SQLite data is stored in `backend/recipes.db`.
+- The app is designed to run locally; Ollama must be active for chat responses.
+
+## Troubleshooting
+
+### Ollama connection errors
+
+If the chat feature says it cannot reach Ollama:
+
+```bash
+ollama serve
+ollama pull gemma3:4b
+```
+
+### No recipes found
+
+If search or chat returns no context, upload recipe data first through the Upload view.
+
+### Frontend not loading
+
+Ensure the frontend dependencies are installed and the backend is running.
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## License
+
+This project is provided as-is for local development and experimentation.
 
 ### CSV Format
 
